@@ -1,0 +1,12 @@
+---
+title: "Project 1 Report"
+author: "Tim Cook, Alex Poplawski, and T.J. Seislove"
+date: "3/25/2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
