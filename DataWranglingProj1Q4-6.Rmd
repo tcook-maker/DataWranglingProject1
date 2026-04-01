@@ -1,0 +1,118 @@
+---
+title: "Data Wrangling Project 1 Questions 4-6"
+author: "TJ Cook"
+date: "3/31/2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+require(nycflights13)
+require(sportyR)
+require(statebins)
+require(gridExtra)
+require(usmap)
+require(cartogram)
+require(lubridate)
+require(socviz)
+require(ggformula)
+require(tidyverse)
+require(sf)
+require(maps)
+require(ggrepel)
+require(stringr)
+require(mosaic)
+require(tidyr)
+require(dplyr)
+require(stevedata)
+require(mosaicData)
+require(scales)
+require(Lock5Data)
+require(viridis)
+require(ggplot2)
+knitr::opts_chunk$set(
+  tidy = FALSE,
+  size = "small"
+)
+```
+
+#Cleaning
+
+```{r, tidy=TRUE}
+Real_World_Fuel_Efficiency <- read_csv("Real-World_Fuel_Efficiency.csv")
+
+clean_numeric <- function(x) {as.numeric(gsub("[\\$, ]", "", x))}
+
+RWFE <- Real_World_Fuel_Efficiency %>% mutate(`TOTAL ACTUAL MILES` = clean_numeric(`TOTAL ACTUAL MILES`), `TOTAL ACTUAL FUEL` = clean_numeric(`TOTAL ACTUAL FUEL`), `ESTIMATED FUEL COSTS PER GALLON` = clean_numeric(`ESTIMATED FUEL COSTS PER GALLON`), `FUEL COSTS PER MILE` = clean_numeric(`FUEL COSTS PER MILE`))
+```
+
+# =================
+# Question 4
+# =================
+
+#4a
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `EPA RATING (CITY)`)) + geom_histogram(bins = 15, fill = "skyblue", color = "black") + labs(title = "Distributions of EPA City Ratings", x = "EPA Rating (City)", y = "Amount")
+
+RWFE %>% summarize(Mean = mean(`EPA RATING (CITY)`, na.rm = TRUE), SD = sd(`EPA RATING (CITY)`, na.rm = TRUE), Min = min(`EPA RATING (CITY)`, na.rm = TRUE), Median = median(`EPA RATING (CITY)`, na.rm = TRUE), Max = max(`EPA RATING (CITY)`, na.rm = TRUE))
+
+#The units are miles per gallon (MPG). The distribution shows there's a big peak just before the 20's, but has a pretty long tail because of hybrid models that have very high for their mileage numbers
+```
+
+#4b
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `Hybrid/Non-Hybrid`)) + geom_bar(fill = "lightgreen", color = "black") + labs(title = "How Many Hybrid vs Non-Hybrid Vehicles", x = "Engine Type", y = "Count")
+
+table(RWFE$`Hybrid/Non-Hybrid`)
+
+#The dataset is dominated by Non-Hybrid cars, although Hybrids do have a good amount of showings in the specialized sedans.
+```
+
+#4c
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `ACTUAL FUEL ECONOMY Geotab`)) + geom_boxplot(fill = "orange") + labs(title = "Boxplot of Actual Fuel Economy", x = "Actual MPG")
+
+summary(RWFE$`ACTUAL FUEL ECONOMY Geotab`)
+
+#The data shows that there is a pretty wide spread. The median is a lot lower than the max, hinting that there are high efficiency outliers.
+```
+
+# =================
+# Question 5
+# =================
+
+#5a
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `Hybrid/Non-Hybrid`, y = `ACTUAL FUEL ECONOMY Geotab`, fill = `Hybrid/Non-Hybrid`)) + geom_boxplot() + labs(title = "Fuel Economy by Engine Type")
+
+RWFE %>% group_by(`Hybrid/Non-Hybrid`) %>% summarize(Mean_MPG = mean(`ACTUAL FUEL ECONOMY Geotab`, na.rm = TRUE))
+
+#Hybrids pretty clearly shows there is a much higher mean and median fuel economy compared to the Non-Hybrid. There's a lot more variance in the Hybrids though to be fair.
+```
+
+#5b
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `TOTAL ACTUAL MILES`, y = `TOTAL ACTUAL FUEL`)) + geom_point() + labs(title = "Miles Driven vs Fuel Used") + geom_smooth()
+
+cor(RWFE$`TOTAL ACTUAL MILES`, RWFE$`TOTAL ACTUAL FUEL`, use = "complete.obs")
+
+#There is a pretty strong correlation between the miles increasing and the fuel used also increasing, surprise surprise.
+```
+
+# =================
+# Question 6
+# =================
+
+```{r, tidy=TRUE}
+ggplot(RWFE, aes(x = `TOTAL ACTUAL MILES`, y = `TOTAL ACTUAL FUEL`, color = `Hybrid/Non-Hybrid`)) + geom_point() + labs(title = "Fuel vs Miles Engine Type") + geom_smooth(se = FALSE)
+
+ggplot(RWFE, aes(x = `TOTAL ACTUAL MILES`, y = `TOTAL ACTUAL FUEL`)) + geom_point() + labs(title = "Fuel vs Miles Facted by Engine Type") + geom_smooth() + facet_wrap(~`Hybrid/Non-Hybrid`)
+
+RWFE %>% group_by(`Hybrid/Non-Hybrid`) %>% summarize(Correlation = cor(`TOTAL ACTUAL MILES`, `TOTAL ACTUAL FUEL`, use = "complete.obs"))
+
+#The slop of the line for Non-Hybrids is steeper than for Hybrids. This indicates that for every mile you drive, you will use more fuel in a Non-Hybrid.
+```
