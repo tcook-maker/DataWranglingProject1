@@ -116,3 +116,4 @@ RWFE %>% group_by(`Hybrid/Non-Hybrid`) %>% summarize(Correlation = cor(`TOTAL AC
 
 #The slop of the line for Non-Hybrids is steeper than for Hybrids. This indicates that for every mile you drive, you will use more fuel in a Non-Hybrid.
 ```
+
